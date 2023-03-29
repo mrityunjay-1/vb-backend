@@ -23,8 +23,12 @@ io.on("connection", (socket) => {
 
     socket.emit("greeting", "Hello from VB Backend");
 
-    socket.on("start_call", (userDetails) => {
+    socket.on("join_room", (userDetails) => {
         addUser({ socketId: socket.id, roomName: userDetails.roomName, socket });
+    })
+
+    socket.on("start_call", () => {
+
     });
 
     socket.on("recording", async (recording) => {
