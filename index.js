@@ -5,6 +5,8 @@ const socketIO = require("socket.io");
 const axios = require("axios");
 const { addUser, getUser, removeUser, users } = require("./manageUsers");
 
+require("dotenv").config();
+
 const fs = require("fs");
 const path = require("path");
 
@@ -43,12 +45,12 @@ io.on("connection", (socket) => {
         console.log("users : ", users);
 
         // call ai api here to pass audio data:
-        // const ai_api_res = await axios.post("http://localhost:6000/njsdata", {
-        //     socketId: socket.id,
-        //     audioData: recording.audioData
-        // });
+        const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
+            web_call_id: socket.id,
+            audioData: recording.audioData
+        });
 
-        // console.log("AI API response: ", ai_api_res);
+        console.log("AI API response: ", ai_api_res);
 
     });
 
