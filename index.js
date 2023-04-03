@@ -72,7 +72,7 @@ app.get("/", (req, res) => {
     res.status(200).send({ status: 200, message: "welcome to voice bot..." });
 });
 
-app.post("/vb-response", (req, res) => {
+app.post("/responseHook", (req, res) => {
     try {
 
         const user = getUser(req.body.web_call_id ?? "", req.body.web_call_id);
