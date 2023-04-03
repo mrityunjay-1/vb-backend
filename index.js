@@ -19,12 +19,17 @@ const io = socketIO(server, {
 });
 
 io.on("connection", (socket) => {
-    console.log(socket.id);
+    // console.log(socket.id);
 
-    socket.emit("greeting", "Hello from VB Backend");
+    socket.emit("greeting", {
+        message: "Hello from VB Backend",
+        socketId: socket.id
+    });
 
     socket.on("join_room", (userDetails) => {
-        addUser({ socketId: socket.id, roomName: userDetails.roomName, socket });
+        console.log("Joining user in a room : ", userDetails);
+        addUser({ socketId: socket.id, roomName: userDetails.roomName, web_call_id: userDetails.roomName, socket });
+        console.log(users);
     })
 
     socket.on("start_call", () => {
@@ -35,6 +40,12 @@ io.on("connection", (socket) => {
 
         console.log("recording: ", recording);
 
+        console.log("users : ", users);
+
+        const fs = require("fs");
+
+        fs.writeFileSync("int16-array.txt", JSON.stringify(recording), "utf-8");
+
         // call ai api here to pass audio data:
         // const ai_api_res = await axios.post("http://localhost:6000/njsdata", {
         //     socketId: socket.id,
@@ -43,6 +54,12 @@ io.on("connection", (socket) => {
 
         // console.log("AI API response: ", ai_api_res);
 
+    });
+
+    socket.on("disconnect", () => {
+        console.log("koi to gaya hai connection tod ke.");
+        console.log("uski id = ", socket.id);
+        removeUser(socket.id);
     });
 
 });
@@ -57,13 +74,19 @@ app.get("/", (req, res) => {
 app.post("/vb-response", (req, res) => {
     try {
 
-        const user = getUser(req.body.socketId ?? "", req.body.roomName);
+        const user = getUser(req.body.web_call_id ?? "", req.body.web_call_id);
 
         if (!user) throw new Error("No user found...");
 
         console.log("found user of vb-response: ", user);
 
-        user.socket.emit("vb-response", "vb-response");
+        user.socket.emit("vb-response", {
+            response: req.body.response, 
+            volume: req.body.volume ?? 0.8, 
+            lang: req.body.lang ?? 'en',
+            rate: req.body.rate ?? 1,
+            pitch: req.body.pitch ?? 1,
+        });
 
         res.status(200).send({ message: "OK" });
 
