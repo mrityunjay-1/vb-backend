@@ -14,6 +14,9 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app);
 
+app.use("/", express.static(path.join(__dirname, "../sessions")));
+app.use("/", express.static('/Users/mrityunjay/learn/audio_files_airlines_new'));
+
 const io = socketIO(server, {
     cors: {
         origin: "*"
@@ -40,9 +43,9 @@ io.on("connection", (socket) => {
 
     socket.on("recording", async (recording) => {
 
-        console.log("recording: ", recording);
+        // console.log("recording: ", recording);
 
-        console.log("users : ", users);
+        // console.log("users : ", users);
 
         // call ai api here to pass audio data:
         const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
@@ -76,11 +79,20 @@ app.post("/vb-response", (req, res) => {
 
         if (!user) throw new Error("No user found...");
 
-        console.log("found user of vb-response: ", user);
+        // console.log("found user of vb-response: ", user);
+
+        console.log("process.env.SERVER_URL + req.body.file_name : ", process.env.SERVER_URL + "/" + req.body.file_name);
+
+        if (!req.body.file_name) {
+            throw new Error("file name not received...");
+        }
 
         io.to(req.body.web_call_id).emit("vb-response", {
             response: req.body.response,
+            file_name: req.body.file_name,
             volume: req.body.volume ?? 0.8,
+            bot_name: req?.body?.bot_name ?? "",
+            audio_file_url: process.env.SERVER_URL + "/" + req.body.file_name,
             lang: req.body.lang ?? 'en',
             rate: req.body.rate ?? 1,
             pitch: req.body.pitch ?? 1,
@@ -93,8 +105,6 @@ app.post("/vb-response", (req, res) => {
         res.status(500).send({ message: err.message });
     }
 });
-
-app.use("/", express.static(path.join(__dirname, "../sessions")));
 
 app.get("/getAllTheSessions", (req, res) => {
     const data = fs.readdirSync(path.join(__dirname, "../sessions"));
