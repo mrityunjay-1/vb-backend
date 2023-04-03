@@ -28,7 +28,7 @@ const getUser = (socketId, web_call_id) => {
     }
 }
 
-const removeUser = (socketId, roomName) => {
+const removeUser = (socketId, _roomName) => {
     try {
 
         const userIndex = users.findIndex((user) => (user.socketId === socketId));

@@ -42,10 +42,6 @@ io.on("connection", (socket) => {
 
         console.log("users : ", users);
 
-        const fs = require("fs");
-
-        fs.writeFileSync("int16-array.txt", JSON.stringify(recording), "utf-8");
-
         // call ai api here to pass audio data:
         // const ai_api_res = await axios.post("http://localhost:6000/njsdata", {
         //     socketId: socket.id,
