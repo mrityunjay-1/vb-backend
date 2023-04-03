@@ -171,6 +171,7 @@ app.use("/audio", audioRouter);
 // getAllTheFiles(path.join(__dirname, "sessions"));
 // console.log(files_output);
 
-server.listen(8080, () => {
-    console.log("Server is up and running on port: ", 8080);
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+    console.log("Server is up and running on port: ", PORT);
 });
