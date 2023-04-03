@@ -7,7 +7,7 @@ const addUser = (userData) => {
 
         if (user) throw new Error("User is already in added...");
 
-        if (!userData || !userData.socketId || !userData.roomName || !userData.web_call_id || !userData.socket) throw new Error("proper user details not provided...");
+        if (!userData || !userData.socketId || !userData.roomName || !userData.web_call_id) throw new Error("proper user details not provided...");
 
         users = [...users, userData];
 

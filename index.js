@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
 
     socket.on("join_room", (userDetails) => {
         console.log("Joining user in a room : ", userDetails);
-        addUser({ socketId: socket.id, roomName: userDetails.roomName, web_call_id: userDetails.roomName, socket });
+        addUser({ socketId: socket.id, roomName: userDetails.roomName, web_call_id: userDetails.roomName });
         console.log(users);
     })
 
@@ -76,9 +76,9 @@ app.post("/vb-response", (req, res) => {
 
         console.log("found user of vb-response: ", user);
 
-        user.socket.emit("vb-response", {
-            response: req.body.response, 
-            volume: req.body.volume ?? 0.8, 
+        io.to(req.body.web_call_id).emit("vb-response", {
+            response: req.body.response,
+            volume: req.body.volume ?? 0.8,
             lang: req.body.lang ?? 'en',
             rate: req.body.rate ?? 1,
             pitch: req.body.pitch ?? 1,
@@ -167,7 +167,7 @@ app.use("/audio", audioRouter);
 // getAllTheFiles(path.join(__dirname, "sessions"));
 // console.log(files_output);
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 9000;
 server.listen(PORT, () => {
     console.log("Server is up and running on port: ", PORT);
 });
