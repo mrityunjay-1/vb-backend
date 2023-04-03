@@ -5,6 +5,12 @@ const socketIO = require("socket.io");
 const axios = require("axios");
 const { addUser, getUser, removeUser, users } = require("./manageUsers");
 
+const BOT_NAME = process?.env?.BOT_NAME ?? "";
+
+if (!BOT_NAME) {
+    process.exit(1);
+}
+
 require("dotenv").config();
 
 const fs = require("fs");
@@ -15,7 +21,7 @@ const app = express();
 const server = http.createServer(app);
 
 app.use("/", express.static(path.join(__dirname, "../sessions")));
-app.use("/", express.static('/Users/mrityunjay/learn/audio_files_airlines_new'));
+app.use("/", express.static(`/media/newhd/voice_bot_scalable/audio_files_${BOT_NAME}`));
 
 const io = socketIO(server, {
     cors: {
