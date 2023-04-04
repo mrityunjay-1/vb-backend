@@ -21,7 +21,7 @@ const app = express();
 const server = http.createServer(app);
 
 app.use("/", express.static(path.join(__dirname, "../sessions")));
-app.use("/", express.static(`/media/newhd/voice_bot_scalable/audio_files_${BOT_NAME}`));
+app.use("/", express.static(`/media/newhd/voice_bot/projects/audio_files_${BOT_NAME}`));
 
 const io = socketIO(server, {
     cors: {
