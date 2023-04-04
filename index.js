@@ -4,6 +4,7 @@ const audioRouter = require("./voice-recorder");
 const socketIO = require("socket.io");
 const axios = require("axios");
 const { addUser, getUser, removeUser, users } = require("./manageUsers");
+require("dotenv").config();
 
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
 
@@ -11,7 +12,6 @@ if (!BOT_NAME) {
     process.exit(1);
 }
 
-require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
