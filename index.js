@@ -20,7 +20,7 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app);
 
-app.use("/", express.static(path.join(__dirname, "../sessions")));
+app.use("/", express.static(path.join(__dirname, "../../projects/sound_recordings")));
 app.use("/", express.static(`/media/newhd/voice_bot/projects/audio_files_${BOT_NAME}`));
 
 const io = socketIO(server, {
@@ -113,7 +113,7 @@ app.post("/responseHook", (req, res) => {
 });
 
 app.get("/getAllTheSessions", (req, res) => {
-    const data = fs.readdirSync(path.join(__dirname, "../sessions"));
+    const data = fs.readdirSync(path.join(__dirname, "../../projects/sound_recordings"));
     res.status(200).send(data);
 });
 
@@ -122,11 +122,11 @@ app.get("/getSession/:folder", (req, res) => {
     const param = req.params.folder;
 
     // let data = fs.readdirSync(path.join(__dirname, "../sessions/" + param));
-    // data = data.map((d) => ("http://localhost:8080/" + param + "/" + d));
+    // data = data.map((d) => ("http://localhost:9000/" + param + "/" + d));
 
-    const transcription_path = path.join(__dirname, "../transcriptions/" + param + ".json");
+    // const transcription_path = path.join(__dirname, "../../projects/transcriptions/" + param + ".json");
 
-    let transcription_data = require(transcription_path);
+    let transcription_data = require("../../projects/outputs/" + param + ".json");
 
     let chat_session_data = [];
 
@@ -136,12 +136,12 @@ app.get("/getSession/:folder", (req, res) => {
             "user": {
                 time: key,
                 text: transcription_data[key]["User"],
-                audio: "http://localhost:8080/" + param + "/" + "user_" + key + ".wav"
+                audio: "http://localhost:9000/" + param + "/" + "user_" + key + ".wav"
             },
             "bot": {
                 time: key,
                 text: transcription_data[key]["Bot"],
-                audio: "http://localhost:8080/" + param + "/" + "bot_" + key + ".mp3"
+                audio: "http://localhost:9000/" + param + "/" + "bot_" + key + ".mp3"
             }
         };
 
