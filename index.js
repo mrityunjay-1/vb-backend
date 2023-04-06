@@ -1,22 +1,18 @@
 const express = require("express");
 const cors = require("cors");
-const audioRouter = require("./voice-recorder");
 const socketIO = require("socket.io");
 const axios = require("axios");
-const { addUser, getUser, removeUser, users } = require("./manageUsers");
-require("dotenv").config();
-
-const BOT_NAME = process?.env?.BOT_NAME ?? "";
-
-if (!BOT_NAME) {
-    process.exit(1);
-}
-
-
 const fs = require("fs");
 const path = require("path");
-
 const http = require("http");
+require("dotenv").config();
+
+const { addUser, getUser, removeUser, users } = require("./manageUsers");
+const audioRouter = require("./voice-recorder");
+
+const BOT_NAME = process?.env?.BOT_NAME ?? "";
+if (!BOT_NAME) process.exit(1);
+
 const app = express();
 const server = http.createServer(app);
 
@@ -38,10 +34,25 @@ io.on("connection", (socket) => {
     });
 
     socket.on("join_room", (userDetails) => {
-        console.log("Joining user in a room : ", userDetails);
-        addUser({ socketId: socket.id, roomName: userDetails.roomName, web_call_id: userDetails.roomName });
-        console.log(users);
-    })
+        try {
+
+            console.log("Joining user in a room : ", userDetails);
+
+            if (!(userDetails && userDetails.name && userDetails.phone && userDetails.email)) {
+                console.log("proper details of user not received at backend...");
+                return;
+            }
+
+            addUser({ socketId: socket.id, roomName: userDetails.roomName, web_call_id: userDetails.roomName });
+
+            fs.writeFileSync(path.join(__dirname, `../../projects/sound_recordings/${socket.id}.json`), JSON.stringify(userDetails), "utf-8");
+
+            console.log(users);
+
+        } catch (err) {
+            console.log("Erorr while joining the room. Err: ", err);
+        }
+    });
 
     socket.on("start_call", () => {
 
@@ -54,12 +65,12 @@ io.on("connection", (socket) => {
         // console.log("users : ", users);
 
         // call ai api here to pass audio data:
-        const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
-            web_call_id: socket.id,
-            audioData: recording.audioData
-        });
+        // const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
+        //     web_call_id: socket.id,
+        //     audioData: recording.audioData
+        // });
 
-        console.log("AI API response: ", ai_api_res);
+        // console.log("AI API response: ", ai_api_res);
 
     });
 
