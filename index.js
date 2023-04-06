@@ -61,11 +61,11 @@ io.on("connection", (socket) => {
         web_call_id: userDetails.roomName,
       });
 
-      fs.writeFileSync(
-        path.join(__dirname, `./user_details/${socket.id}.json`),
-        JSON.stringify(userDetails, null, 4),
-        "utf-8"
-      );
+      // fs.writeFileSync(
+      //   path.join(__dirname, `./user_details/${socket.id}.json`),
+      //   JSON.stringify(userDetails, null, 4),
+      //   "utf-8"
+      // );
 
       console.log(users);
     } catch (err) {
@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("start_call", () => {});
+  socket.on("start_call", () => { });
 
   socket.on("recording", async (recording) => {
     // console.log("recording: ", recording);
@@ -168,7 +168,9 @@ app.get("/getAllTheSessions", (req, res) => {
       sessions.push(obj);
     }
 
-    sessions = sessions.sort((a, b) => a?.startDateTime - b?.startDateTime);
+    sessions = sessions.sort((a, b) => {
+      return +b.user_details.startDateTime - +a.user_details.startDateTime
+    });
 
     res.status(200).send(sessions);
   } catch (err) {
