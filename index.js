@@ -22,7 +22,7 @@ app.use(
 );
 app.use(
   "/",
-  express.static(`/media/newhd/voice_bot/projects/audio_files_${BOT_NAME}`)
+  express.static(`../../projects/audio_files_${BOT_NAME}`)
 );
 
 const io = socketIO(server, {
