@@ -81,12 +81,33 @@ io.on("connection", (socket) => {
     // console.log("users : ", users);
 
     // call ai api here to pass audio data:
-    const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
+    // const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
+    //   web_call_id: socket.id,
+    //   audioData: recording.audioData,
+    // });
+
+    // console.log("AI API response: ", ai_api_res);
+
+    socket.emit("webrecorder", {
       web_call_id: socket.id,
       audioData: recording.audioData,
     });
 
-    console.log("AI API response: ", ai_api_res);
+  });
+
+  socket.on("responseHook", (body) => {
+
+    io.to(body.web_call_id).emit("vb-response", {
+      response: body.response,
+      file_name: body.file_name,
+      volume: body.volume ?? 0.8,
+      bot_name: req?.body?.bot_name ?? "",
+      audio_file_url: process.env.SERVER_URL + "/" + body.file_name,
+      lang: body.lang ?? "en",
+      rate: body.rate ?? 1,
+      pitch: body.pitch ?? 1,
+    });
+
   });
 
   socket.on("disconnect", () => {
@@ -94,6 +115,7 @@ io.on("connection", (socket) => {
     console.log("uski id = ", socket.id);
     removeUser(socket.id);
   });
+
 });
 
 app.use(express.json());
