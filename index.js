@@ -5,6 +5,10 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
+const chokidar = require("chokidar");
+
+const { getSessionDetails } = require("./helperActions");
+
 require("dotenv").config();
 
 const { addUser, getUser, getAllUsers, removeUser, getUserRoomBySocketId } = require("./manageUsers");
@@ -16,8 +20,11 @@ if (!BOT_NAME) process.exit(1);
 const app = express();
 const server = http.createServer(app);
 
-app.use("/", express.static(path.join(__dirname, "../../projects/sound_recordings")));
-app.use("/", express.static(`../../projects/audio_files_${BOT_NAME}`));
+const sound_recordings_path = path.join(__dirname, "../../projects/sound_recordings");
+const audio_files_path = `../../projects/audio_files_${BOT_NAME}`;
+
+app.use("/", express.static(sound_recordings_path));
+app.use("/", express.static(audio_files_path));
 
 const io = socketIO(server, {
   cors: {
@@ -160,7 +167,48 @@ io.on("connection", (socket) => {
 app.use(express.json());
 app.use(cors());
 
+// Watcher for live feed update
+const watcher = chokidar.watch("../../outputs", { persistent: true });
 
+// watcher.on("add", () => {
+
+// });
+
+watcher.on("change", async (path) => {
+
+  if (path.endsWith(".json")) {
+
+    const changed_file_data = require(path);
+
+    const file_name = path?.split("/")?.slice(-1).join("");
+
+    if (!file_name) {
+      console.log("no file name received.");
+      return;
+    }
+
+    let socketId = file_name?.replace(".json", "");
+
+    console.log("socket ID: ", socketId);
+
+    const roomName = await getUserRoomBySocketId(socketId);
+
+    if (roomName) {
+      console.log("Yay! Room name mil gaya...", roomName);
+
+      const chat_session_data = getSessionDetails(socketId);
+
+      // Yaha data emit karna hai ab bas
+
+      io.to(roomName).emit("liveBroadcastChatData", { roomName, socketId, chat_session_data });
+
+    } else {
+      console.log("Nahi! roomname nahi mila with this socket id: ", socketId);
+    }
+
+  }
+
+});
 
 app.get("/", (req, res) => {
   res.status(200).send({ status: 200, message: "welcome to voice bot..." });
@@ -251,26 +299,7 @@ app.get("/getSession/:folder", (req, res) => {
 
   // const transcription_path = path.join(__dirname, "../../projects/transcriptions/" + param + ".json");
 
-  let transcription_data = require("../../projects/outputs/" + param + ".json");
-
-  let chat_session_data = [];
-
-  for (const [key, _value] of Object.entries(transcription_data)) {
-    let obj = {
-      user: {
-        time: key,
-        text: transcription_data[key]["User"],
-        audio: "http://localhost:9000/" + param + "/" + "user_" + key + ".wav",
-      },
-      bot: {
-        time: key,
-        text: transcription_data[key]["Bot"],
-        audio: "http://localhost:9000/" + param + "/" + "bot_" + key + ".mp3",
-      },
-    };
-
-    chat_session_data.push(obj);
-  }
+  const chat_session_data = getSessionDetails(param);
 
   res.status(200).send(chat_session_data);
 });
