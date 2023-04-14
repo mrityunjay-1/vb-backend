@@ -99,8 +99,8 @@ io.on("connection", (socket) => {
 
     try {
 
-      socket.emit("webrecorder", {
-        web_call_id: socket.id,
+      io.emit("webrecorder", {
+        webCallId: socket.id,
         audioData: recording.audioData,
       });
 
@@ -168,7 +168,7 @@ app.use(express.json());
 app.use(cors());
 
 // Watcher for live feed update
-const watcher = chokidar.watch("../../outputs", { persistent: true });
+const watcher = chokidar.watch("../../projects/outputs", { persistent: true });
 
 // watcher.on("add", () => {
 
@@ -191,7 +191,7 @@ watcher.on("change", async (path) => {
 
     console.log("socket ID: ", socketId);
 
-    const roomName = await getUserRoomBySocketId(socketId);
+    const { roomName } = await getUserRoomBySocketId(socketId);
 
     if (roomName) {
       console.log("Yay! Room name mil gaya...", roomName);
@@ -200,7 +200,7 @@ watcher.on("change", async (path) => {
 
       // Yaha data emit karna hai ab bas
 
-      io.to(roomName).emit("liveBroadcastChatData", { roomName, socketId, chat_session_data });
+      io.emit("liveBroadcastChatData", { roomName, socketId, chat_session_data });
 
     } else {
       console.log("Nahi! roomname nahi mila with this socket id: ", socketId);
@@ -282,7 +282,7 @@ app.get("/getAllTheSessions", (req, res) => {
     }
 
     sessions = sessions.sort((a, b) => {
-      return +b.user_details.startDateTime - +a.user_details.startDateTime
+      return +b?.user_details?.startDateTime - +a?.user_details?.startDateTime
     });
 
     res.status(200).send(sessions);

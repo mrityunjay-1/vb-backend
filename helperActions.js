@@ -1,7 +1,16 @@
 
 const getSessionDetails = (param) => {
+    console.log("getsession details : ", param);
 
-    let transcription_data = require("../../projects/outputs/" + param + ".json");
+    const path = "../../projects/outputs/" + param + ".json";
+
+    delete require.cache[require.resolve(path)];
+
+    console.log("path: ", path);
+
+    let transcription_data = require(path);
+
+    console.log("transcription_data: ", transcription_data);
 
     let chat_session_data = [];
 
