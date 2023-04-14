@@ -7,7 +7,7 @@ const path = require("path");
 const http = require("http");
 require("dotenv").config();
 
-const { addUser, getUser, removeUser, users } = require("./manageUsers");
+const { addUser, getUser, getAllUsers, removeUser, getUserRoomBySocketId } = require("./manageUsers");
 const audioRouter = require("./voice-recorder");
 
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
@@ -16,14 +16,8 @@ if (!BOT_NAME) process.exit(1);
 const app = express();
 const server = http.createServer(app);
 
-app.use(
-  "/",
-  express.static(path.join(__dirname, "../../projects/sound_recordings"))
-);
-app.use(
-  "/",
-  express.static(`../../projects/audio_files_${BOT_NAME}`)
-);
+app.use("/", express.static(path.join(__dirname, "../../projects/sound_recordings")));
+app.use("/", express.static(`../../projects/audio_files_${BOT_NAME}`));
 
 const io = socketIO(server, {
   cors: {
@@ -39,35 +33,43 @@ io.on("connection", (socket) => {
     socketId: socket.id,
   });
 
-  socket.on("join_room", (userDetails) => {
+  socket.on("join_room", async (userDetails) => {
     try {
+
       console.log("Joining user in a room : ", userDetails);
 
-      if (
-        !(
-          userDetails &&
-          userDetails.name &&
-          userDetails.phone &&
-          userDetails.email
-        )
-      ) {
+      if (userDetails && userDetails.userType === "user" && userDetails.roomName && userDetails.name && userDetails.phone && userDetails.email) {
+
+        socket.join(userDetails.roomName);
+
+        await addUser({
+          socketId: socket.id,
+          roomName: userDetails.roomName,
+          web_call_id: userDetails.roomName, // it should be socket.id
+          ...userDetails
+        });
+
+      }
+      else if (userDetails && userDetails.userType === "agent" && userDetails.roomName) {
+
+        socket.join(userDetails.roomName);
+
+        await addUser({
+          socketId: socket.id,
+          roomName: userDetails.roomName,
+          web_call_id: userDetails.roomName,
+          ...userDetails
+        });
+
+      } else {
+
         console.log("proper details of user not received at backend...");
         return;
       }
 
-      addUser({
-        socketId: socket.id,
-        roomName: userDetails.roomName,
-        web_call_id: userDetails.roomName,
-      });
+      const all_users = await getAllUsers();
+      io.emit("showliveUsers", all_users);
 
-      // fs.writeFileSync(
-      //   path.join(__dirname, `./user_details/${socket.id}.json`),
-      //   JSON.stringify(userDetails, null, 4),
-      //   "utf-8"
-      // );
-
-      console.log(users);
     } catch (err) {
       console.log("Erorr while joining the room. Err: ", err);
     }
@@ -88,32 +90,69 @@ io.on("connection", (socket) => {
 
     // console.log("AI API response: ", ai_api_res);
 
-    socket.emit("webrecorder", {
-      web_call_id: socket.id,
-      audioData: recording.audioData,
-    });
+    try {
+
+      socket.emit("webrecorder", {
+        web_call_id: socket.id,
+        audioData: recording.audioData,
+      });
+
+    } catch (err) {
+      console.log("Error: ", err);
+    }
+
+
 
   });
 
-  socket.on("responseHook", (body) => {
+  // socket.on("responseHook", (body) => {
 
-    io.to(body.web_call_id).emit("vb-response", {
-      response: body.response,
-      file_name: body.file_name,
-      volume: body.volume ?? 0.8,
-      bot_name: req?.body?.bot_name ?? "",
-      audio_file_url: process.env.SERVER_URL + "/" + body.file_name,
-      lang: body.lang ?? "en",
-      rate: body.rate ?? 1,
-      pitch: body.pitch ?? 1,
-    });
+  //   io.to(body.web_call_id).emit("vb-response", {
+  //     response: body.response,
+  //     file_name: body.file_name,
+  //     volume: body.volume ?? 0.8,
+  //     bot_name: req?.body?.bot_name ?? "",
+  //     audio_file_url: process.env.SERVER_URL + "/" + body.file_name,
+  //     lang: body.lang ?? "en",
+  //     rate: body.rate ?? 1,
+  //     pitch: body.pitch ?? 1,
+  //   });
 
+  // });
+
+  socket.on("disconnect_call", async ({ socketId }) => {
+    try {
+      console.log("Disconnect call request by socket id = ", socket.id);
+
+      await removeUser(socketId);
+
+      const users = await getAllUsers();
+      io.emit("showliveUsers", users);
+
+    } catch (err) {
+      console.error("Error while user disconnection of call : ", err);
+    }
   });
 
-  socket.on("disconnect", () => {
-    console.log("koi to gaya hai connection tod ke.");
-    console.log("uski id = ", socket.id);
-    removeUser(socket.id);
+  socket.on("getLiveUsers", async () => {
+    try {
+      const users = await getAllUsers();
+      io.emit("showliveUsers", users);
+    } catch (err) {
+      console.log("Error: ", err);
+    }
+  });
+
+  socket.on("disconnect", async () => {
+    try {
+      await removeUser(socket.id);
+
+      const users = await getAllUsers();
+      io.emit("showliveUsers", users);
+
+    } catch (err) {
+      console.log("error: ", err);
+    }
   });
 
 });
@@ -121,11 +160,13 @@ io.on("connection", (socket) => {
 app.use(express.json());
 app.use(cors());
 
+
+
 app.get("/", (req, res) => {
   res.status(200).send({ status: 200, message: "welcome to voice bot..." });
 });
 
-app.post("/responseHook", (req, res) => {
+app.post("/responseHook", async (req, res) => {
   try {
     const user = getUser(req.body.web_call_id ?? "", req.body.web_call_id);
 
@@ -142,7 +183,9 @@ app.post("/responseHook", (req, res) => {
       throw new Error("file name not received...");
     }
 
-    io.to(req.body.web_call_id).emit("vb-response", {
+    const { roomName } = await getUserRoomBySocketId(req.body.web_call_id);
+
+    io.to(roomName).emit("vb-response", {
       response: req.body.response,
       file_name: req.body.file_name,
       volume: req.body.volume ?? 0.8,

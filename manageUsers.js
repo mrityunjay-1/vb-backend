@@ -1,15 +1,21 @@
+
+const { LiveUser } = require("./models/live-users");
+
 let users = [];
 
-const addUser = (userData) => {
+const addUser = async (userData) => {
     try {
 
-        const user = getUser(userData.socketId);
+        const user = await getUser(userData.socketId);
 
         if (user) throw new Error("User is already in added...");
 
         if (!userData || !userData.socketId || !userData.roomName || !userData.web_call_id) throw new Error("proper user details not provided...");
 
         users = [...users, userData];
+
+        const liveUser = new LiveUser(userData);
+        await liveUser.save();
 
         return userData;
 
@@ -18,29 +24,69 @@ const addUser = (userData) => {
     }
 }
 
-const getUser = (socketId, web_call_id) => {
+const getUser = async (socketId, web_call_id) => {
     try {
+
         console.log("all users : ", users);
-        const user = users.find((user) => (user.socketId === socketId || user.web_call_id === web_call_id));
+        // const user = users.find((user) => (user.socketId === socketId || user.web_call_id === web_call_id));
+
+        const user = await LiveUser.findOne({ socketId });
+
         return user;
+
     } catch (err) {
         console.log("Error while finding user...", err);
     }
 }
 
-const removeUser = (socketId, _roomName) => {
+const removeUser = async (socketId, _roomName) => {
     try {
 
-        const userIndex = users.findIndex((user) => (user.socketId === socketId));
+        if (socketId) {
 
-        const removedUser = users.splice(userIndex, 1);
+            const userIndex = users.findIndex((user) => (user.socketId === socketId));
 
-        console.log("removedUser: ", removedUser);
+            const ru = await LiveUser.findOneAndRemove({ socketId });
 
-        return removedUser;
+            console.log("ru: ", ru);
+
+            const removedUser = users.splice(userIndex, 1);
+
+            console.log("removedUser: ", removedUser);
+
+            return removedUser;
+        }
 
     } catch (err) {
         console.log("Error while removing user...", err);
+    }
+}
+
+const getAllUsers = async () => {
+    try {
+
+        const users = await LiveUser.find({ userType: "user" });
+        return users;
+
+    } catch (err) {
+        console.log("Error: ", err);
+    }
+}
+
+const getUserRoomBySocketId = async (socketId) => {
+    try {
+
+        if (!socketId) {
+            console.log("No Socket id received to get roomname");
+            return null;
+        }
+
+        const user = await LiveUser.findOne({ socketId });
+
+        return user;
+
+    } catch (err) {
+        console.log("Error: ", err);
     }
 }
 
@@ -48,5 +94,7 @@ module.exports = {
     users,
     addUser,
     getUser,
-    removeUser
+    removeUser,
+    getAllUsers,
+    getUserRoomBySocketId
 }
