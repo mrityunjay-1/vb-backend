@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ChatSessionsSchema = mongoose.model({
+const ChatSessionsSchema = mongoose.Schema({
     name: String,
     email: String,
     phone: String,

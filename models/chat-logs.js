@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ChatLogsSchema = mongoose.model({
+const ChatLogsSchema = mongoose.Schema({
     logs: [{}]
 });
 
