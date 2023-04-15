@@ -1,5 +1,7 @@
 
 const { LiveUser } = require("./models/live-users");
+const { ChatLogs } = require("./models/chat-logs");
+const { ChatSessions } = require("./models/chat-sessions");
 
 const { getSessionDetails } = require("./helperActions");
 
@@ -55,7 +57,15 @@ const removeUser = async (socketId, _roomName) => {
 
             const data = getSessionDetails(socketId);
 
+            const chatLog = new ChatLogs({ logs: data });
 
+            const chatSession = new ChatSessions({
+                ...ru,
+                chat_logs: chatLog._id
+            });
+
+            await chatLog.save();
+            await chatSession.save();
 
             console.log("ru: ", ru);
 
