@@ -57,6 +57,9 @@ const removeUser = async (socketId, _roomName) => {
 
             const data = getSessionDetails(socketId);
 
+            const cs = await ChatSessions.deleteMany({ socketId });
+            const cl = await ChatLogs.deleteMany({ chat_session: socketId });
+
             const chatLog = new ChatLogs({ chat_session: socketId, logs: data });
 
             const chatSession = new ChatSessions({
