@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const ChatLogsSchema = mongoose.Schema({
+    chat_session: String,
     logs: [{}]
 });
 

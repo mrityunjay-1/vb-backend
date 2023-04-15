@@ -53,14 +53,21 @@ const removeUser = async (socketId, _roomName) => {
             // console.log("removedUser: ", removedUser);
             // return removedUser;
 
-            const ru = await LiveUser.findOneAndRemove({ socketId });
+            const ru = await LiveUser.findOneAndRemove({ socketId }).lean().exec();
 
             const data = getSessionDetails(socketId);
 
-            const chatLog = new ChatLogs({ logs: data });
+            const chatLog = new ChatLogs({ chat_session: socketId, logs: data });
 
             const chatSession = new ChatSessions({
-                ...ru,
+                email: ru.email,
+                name: ru.name,
+                phone: ru.phone,
+                roomName: ru.roomName,
+                socketId: ru.socketId,
+                startDateTime: ru.startDateTime,
+                userType: ru.userType,
+                web_call_id: ru.web_call_id,
                 chat_logs: chatLog._id
             });
 
