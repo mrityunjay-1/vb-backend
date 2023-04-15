@@ -1,6 +1,8 @@
 
 const { LiveUser } = require("./models/live-users");
 
+const { getSessionDetails } = require("./helperActions");
+
 let users = [];
 
 const addUser = async (userData) => {
@@ -44,17 +46,19 @@ const removeUser = async (socketId, _roomName) => {
 
         if (socketId) {
 
-            const userIndex = users.findIndex((user) => (user.socketId === socketId));
+            // const userIndex = users.findIndex((user) => (user.socketId === socketId));
+            // const removedUser = users.splice(userIndex, 1);
+            // console.log("removedUser: ", removedUser);
+            // return removedUser;
 
             const ru = await LiveUser.findOneAndRemove({ socketId });
 
+            const data = getSessionDetails(socketId);
+
+
+
             console.log("ru: ", ru);
 
-            const removedUser = users.splice(userIndex, 1);
-
-            console.log("removedUser: ", removedUser);
-
-            return removedUser;
         }
 
     } catch (err) {
