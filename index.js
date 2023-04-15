@@ -13,6 +13,7 @@ require("dotenv").config();
 
 const { addUser, getUser, getAllUsers, removeUser, getUserRoomBySocketId } = require("./manageUsers");
 const audioRouter = require("./voice-recorder");
+const { ChatSessions } = require("./models/chat-sessions");
 
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
 if (!BOT_NAME) process.exit(1);
@@ -251,39 +252,51 @@ app.post("/responseHook", async (req, res) => {
   }
 });
 
-app.get("/getAllTheSessions", (req, res) => {
+app.get("/getAllTheSessions", async (req, res) => {
   try {
-    const data = fs.readdirSync(
-      path.join(__dirname, "../../projects/sound_recordings")
-    );
+    // const data = fs.readdirSync(
+    //   path.join(__dirname, "../../projects/sound_recordings")
+    // );
 
-    let sessions = [];
+    // let sessions = [];
 
-    for (const session of data) {
-      let obj = {
-        id: session,
-      };
+    // for (const session of data) {
+    //   let obj = {
+    //     id: session,
+    //   };
 
-      let isUserDataFileExists = "";
+    //   let isUserDataFileExists = "";
 
-      try {
-        isUserDataFileExists = require.resolve(
-          `./user_details/${session}.json`
-        );
-      } catch (err) {
-        console.log("err while resolving the module...", err);
-      }
+    //   try {
+    //     isUserDataFileExists = require.resolve(
+    //       `./user_details/${session}.json`
+    //     );
+    //   } catch (err) {
+    //     console.log("err while resolving the module...", err);
+    //   }
 
-      if (isUserDataFileExists) {
-        obj.user_details = require(`./user_details/${session}.json`);
-      }
+    //   if (isUserDataFileExists) {
+    //     obj.user_details = require(`./user_details/${session}.json`);
+    //   }
 
-      sessions.push(obj);
+    //   sessions.push(obj);
+    // }
+
+    // sessions = sessions.sort((a, b) => {
+    //   return +b?.user_details?.startDateTime - +a?.user_details?.startDateTime
+    // });
+
+    let { limit, skip } = req.query;
+
+    if (!(limit?.toString() && skip?.toString())) {
+      limit = 1000;
+      skip = 0;
     }
 
-    sessions = sessions.sort((a, b) => {
-      return +b?.user_details?.startDateTime - +a?.user_details?.startDateTime
-    });
+    console.log("Limit: ", limit);
+    console.log("Skip: ", skip);
+
+    const sessions = await ChatSessions.find().sort({ _id: -1 }).limit(limit).skip(skip);
 
     res.status(200).send(sessions);
   } catch (err) {
