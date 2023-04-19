@@ -235,14 +235,17 @@ app.post("/responseHook", async (req, res) => {
     const { roomName } = await getUserRoomBySocketId(req.body.web_call_id);
 
     io.to(roomName).emit("vb-response", {
-      response: req.body.response,
-      file_name: req.body.file_name,
-      volume: req.body.volume ?? 0.8,
+      response: req.body.response, // no-use as of now
+      file_name: req.body.file_name, // no-use as of now
+      volume: req.body.volume ?? 0.8, // no-use as of now
       bot_name: req?.body?.bot_name ?? "",
       audio_file_url: process.env.SERVER_URL + "/" + req.body.file_name,
-      lang: req.body.lang ?? "en",
-      rate: req.body.rate ?? 1,
-      pitch: req.body.pitch ?? 1,
+      lang: req.body.lang ?? "en", // no-use as of now
+      rate: req.body.rate ?? 1, // no-use as of now
+      pitch: req.body.pitch ?? 1, // no-use as of now,
+
+      // New Hold Line Feature
+      hold_line: req?.body?.hold_line ?? false
     });
 
     res.status(200).send({ message: "OK" });
