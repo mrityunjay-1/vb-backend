@@ -40,7 +40,7 @@ UserSchema.statics.findUserByEmailAndPassword = async function ({ email, passwor
 UserSchema.methods.generateToken = async function (userId) {
     try {
 
-        const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: 100 });
+        const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
         if (!token) throw new Error("Error while generating token...");
 
