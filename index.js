@@ -15,6 +15,9 @@ const { addUser, getUser, getAllUsers, removeUser, getUserRoomBySocketId } = req
 const audioRouter = require("./voice-recorder");
 const { ChatSessions } = require("./models/chat-sessions");
 
+// Routers
+const userRouter = require("./routes/userRouter");
+
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
 if (!BOT_NAME) process.exit(1);
 
@@ -167,6 +170,7 @@ io.on("connection", (socket) => {
 
 app.use(express.json());
 app.use(cors());
+app.use("/", userRouter);
 
 // Watcher for live feed update
 const watcher = chokidar.watch("../../projects/outputs", { persistent: true });
