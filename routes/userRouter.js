@@ -5,7 +5,7 @@ const { decodeToken } = require("../middlewares/helperActions");
 
 const Router = express.Router();
 
-Router.get("/verifyToken", async (req, res) => {
+Router.post("/verifyToken", async (req, res) => {
     try {
 
         const token = req.body.token;
