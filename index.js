@@ -15,6 +15,10 @@ const { addUser, getUser, getAllUsers, removeUser, getUserRoomBySocketId } = req
 const audioRouter = require("./voice-recorder");
 const { ChatSessions } = require("./models/chat-sessions");
 
+// Routers
+const userRouter = require("./routes/userRouter");
+const sessionRouter = require("./routes/sessionRouter");
+
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
 if (!BOT_NAME) process.exit(1);
 
@@ -167,13 +171,11 @@ io.on("connection", (socket) => {
 
 app.use(express.json());
 app.use(cors());
+app.use("/", userRouter);
+app.use("/", sessionRouter);
 
 // Watcher for live feed update
 const watcher = chokidar.watch("../../projects/outputs", { persistent: true });
-
-// watcher.on("add", () => {
-
-// });
 
 watcher.on("change", async (path) => {
 
@@ -255,72 +257,7 @@ app.post("/responseHook", async (req, res) => {
   }
 });
 
-app.get("/getAllTheSessions", async (req, res) => {
-  try {
-    // const data = fs.readdirSync(
-    //   path.join(__dirname, "../../projects/sound_recordings")
-    // );
-
-    // let sessions = [];
-
-    // for (const session of data) {
-    //   let obj = {
-    //     id: session,
-    //   };
-
-    //   let isUserDataFileExists = "";
-
-    //   try {
-    //     isUserDataFileExists = require.resolve(
-    //       `./user_details/${session}.json`
-    //     );
-    //   } catch (err) {
-    //     console.log("err while resolving the module...", err);
-    //   }
-
-    //   if (isUserDataFileExists) {
-    //     obj.user_details = require(`./user_details/${session}.json`);
-    //   }
-
-    //   sessions.push(obj);
-    // }
-
-    // sessions = sessions.sort((a, b) => {
-    //   return +b?.user_details?.startDateTime - +a?.user_details?.startDateTime
-    // });
-
-    let { limit, skip } = req.query;
-
-    if (!(limit?.toString() && skip?.toString())) {
-      limit = 1000;
-      skip = 0;
-    }
-
-    console.log("Limit: ", limit);
-    console.log("Skip: ", skip);
-
-    const sessions = await ChatSessions.find().sort({ _id: -1 }).limit(limit).skip(skip);
-
-    res.status(200).send(sessions);
-  } catch (err) {
-    console.log("err: ", err);
-  }
-});
-
-app.get("/getSession/:folder", (req, res) => {
-  const param = req.params.folder;
-
-  // let data = fs.readdirSync(path.join(__dirname, "../sessions/" + param));
-  // data = data.map((d) => ("http://localhost:9000/" + param + "/" + d));
-
-  // const transcription_path = path.join(__dirname, "../../projects/transcriptions/" + param + ".json");
-
-  const chat_session_data = getSessionDetails(param);
-
-  res.status(200).send(chat_session_data);
-});
-
-app.use("/audio", audioRouter);
+app.use("/audio", audioRouter); // not in use as of now
 
 // console.log(path.join(__dirname, "./sessions"));
 

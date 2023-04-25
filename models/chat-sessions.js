@@ -13,6 +13,8 @@ const ChatSessionsSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "ChatLogs"
     }
+}, {
+    timestamps: true
 });
 
 const ChatSessions = new mongoose.model("ChatSessions", ChatSessionsSchema);

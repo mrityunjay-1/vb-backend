@@ -10,6 +10,8 @@ const LiveUserSchema = mongoose.Schema({
     startDateTime: Number,
     web_call_id: String,
     userType: String
+}, {
+    timestamps: true
 });
 
 const LiveUser = new mongoose.model("LiveUser", LiveUserSchema);
