@@ -6,9 +6,11 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { ChatSessions } = require("../models/chat-sessions");
 const { ChatLogs } = require("../models/chat-logs");
 
-Router.use(authMiddleware);
+const {getSessionDetails} = require("../helperActions");
 
-Router.get("/getAllTheSessions", async (req, res) => {
+// Router.use(authMiddleware);
+
+Router.get("/getAllTheSessions", authMiddleware, async (req, res) => {
     try {
         // const data = fs.readdirSync(
         //   path.join(__dirname, "../../projects/sound_recordings")
@@ -59,7 +61,7 @@ Router.get("/getAllTheSessions", async (req, res) => {
     }
 });
 
-Router.get("/getSession/:socketId", async (req, res) => {
+Router.get("/getSession/:socketId", authMiddleware, async (req, res) => {
     try {
 
         const socketId = req?.params?.socketId;
@@ -69,11 +71,11 @@ Router.get("/getSession/:socketId", async (req, res) => {
         // let data = fs.readdirSync(path.join(__dirname, "../sessions/" + param));
         // data = data.map((d) => ("http://localhost:9000/" + param + "/" + d));
         // const transcription_path = path.join(__dirname, "../../projects/transcriptions/" + param + ".json");
-        // const chat_session_data = getSessionDetails(param);
+        const chat_session_data = getSessionDetails(socketId);
 
-        const sessionDetails = await ChatLogs.findOne({ chat_session: socketId });
+        // const sessionDetails = await ChatLogs.findOne({ chat_session: socketId });
 
-        res.status(200).send(sessionDetails.logs);
+        res.status(200).send(chat_session_data);
 
     } catch (err) {
         console.log("Error in getsession: ", err);
