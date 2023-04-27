@@ -45,6 +45,21 @@ io.on("connection", (socket) => {
     socketId: socket.id,
   });
 
+  // let i = 0;
+
+  // socket.on("audio", (audioStream) => {
+
+  //   console.log("audioStream: ",  audioStream);
+
+  //   fs.appendFileSync("abcd.txt", ("," + (JSON.stringify(audioStream)).replace("[", "").replace("]", "")));
+
+  //   console.log(i++);
+
+  //   if (i === 20) {
+  //     process.exit(1);
+  //   }
+  // });
+
   socket.on("join_room", async (userDetails) => {
     try {
 
@@ -89,8 +104,8 @@ io.on("connection", (socket) => {
 
   socket.on("start_call", () => { });
 
-  socket.on("recording", async (recording) => {
-    // console.log("recording: ", recording);
+  socket.on("audioStream", async (recording) => {
+    console.log("recording: ", recording);
 
     // console.log("users : ", users);
 
@@ -113,7 +128,31 @@ io.on("connection", (socket) => {
       console.log("Error: ", err);
     }
 
+  });
 
+  socket.on("recording", async (recording) => {
+    console.log("recording: ", recording);
+
+    // console.log("users : ", users);
+
+    // call ai api here to pass audio data:
+    // const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
+    //   web_call_id: socket.id,
+    //   audioData: recording.audioData,
+    // });
+
+    // console.log("AI API response: ", ai_api_res);
+
+    try {
+
+      io.emit("webrecorder", {
+        webCallId: socket.id,
+        audioData: recording.audioData,
+      });
+
+    } catch (err) {
+      console.log("Error: ", err);
+    }
 
   });
 
