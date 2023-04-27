@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
         await addUser({
           socketId: socket.id,
           roomName: userDetails.roomName,
-          web_call_id: userDetails.roomName, // it should be socket.id
+          web_call_id: socket.id,
           ...userDetails
         });
 
@@ -84,7 +84,7 @@ io.on("connection", (socket) => {
         await addUser({
           socketId: socket.id,
           roomName: userDetails.roomName,
-          web_call_id: userDetails.roomName,
+          web_call_id: socket.id,
           ...userDetails
         });
 
@@ -105,7 +105,7 @@ io.on("connection", (socket) => {
   socket.on("start_call", () => { });
 
   socket.on("audioStream", async (recording) => {
-    console.log("recording: ", recording);
+    // console.log("recording: ", recording);
 
     // console.log("users : ", users);
 
@@ -131,7 +131,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("recording", async (recording) => {
-    console.log("recording: ", recording);
+    // console.log("recording: ", recording);
 
     // console.log("users : ", users);
 

@@ -6,9 +6,9 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { ChatSessions } = require("../models/chat-sessions");
 const { ChatLogs } = require("../models/chat-logs");
 
-Router.use(authMiddleware);
+// Router.use(authMiddleware);
 
-Router.get("/getAllTheSessions", async (req, res) => {
+Router.get("/getAllTheSessions", authMiddleware, async (req, res) => {
     try {
         // const data = fs.readdirSync(
         //   path.join(__dirname, "../../projects/sound_recordings")
@@ -59,7 +59,7 @@ Router.get("/getAllTheSessions", async (req, res) => {
     }
 });
 
-Router.get("/getSession/:socketId", async (req, res) => {
+Router.get("/getSession/:socketId", authMiddleware, async (req, res) => {
     try {
 
         const socketId = req?.params?.socketId;
