@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const db_url = `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+const db_url = `mongodb://${process.env.DB_USER_NAME}:${process.env.DB_PASSWORD}@${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
 console.log("DB URL : ", db_url);
 
 (
