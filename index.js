@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const socketIO = require("socket.io");
+
+const ws = require("ws");
+
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
@@ -30,6 +33,9 @@ const audio_files_path = `../../projects/audio_files_${BOT_NAME}`;
 
 app.use("/", express.static(sound_recordings_path));
 app.use("/", express.static(audio_files_path));
+
+
+// socket.io hu mai
 
 const io = socketIO(server, {
   cors: {
@@ -122,6 +128,7 @@ io.on("connection", (socket) => {
       io.emit("webrecorder", {
         webCallId: socket.id,
         audioData: recording.audioData,
+        recv_type: process?.env?.AI_RECV_TYPE ?? "NA"
       });
 
     } catch (err) {
@@ -148,6 +155,7 @@ io.on("connection", (socket) => {
       io.emit("webrecorder", {
         webCallId: socket.id,
         audioData: recording.audioData,
+        recv_type: process?.env?.AI_RECV_TYPE ?? "NA"
       });
 
     } catch (err) {
@@ -206,6 +214,13 @@ io.on("connection", (socket) => {
     }
   });
 
+});
+
+// ws hu mai
+const wss = new ws.Server({server});
+
+wss.on("connection", (socket) => {
+  console.log("Socket connection received over ws : ", socket.id);
 });
 
 app.use(express.json());
