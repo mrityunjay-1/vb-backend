@@ -3,17 +3,22 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 
 const UserSchema = mongoose.Schema({
+    tenantId: {
+        type: String,
+        required: true,
+        unique: true
+    },
     name: {
         type: String,
         required: true
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
-        required: true
     }
 }, {
     timestamps: true
@@ -50,6 +55,8 @@ UserSchema.methods.generateToken = async function (userId) {
         console.log("Error: ", err);
     }
 }
+
+UserSchema.index({ tenantId: 1, email: 1 }, { unique: true });
 
 const User = new mongoose.model("User", UserSchema);
 

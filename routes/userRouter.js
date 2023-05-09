@@ -5,6 +5,9 @@ const { decodeToken } = require("../middlewares/helperActions");
 
 const Router = express.Router();
 
+const { v4 } = require("uuid");
+const { hashPassword } = require("../utils/utility");
+
 Router.post("/verifyToken", async (req, res) => {
     try {
 
@@ -22,6 +25,38 @@ Router.post("/verifyToken", async (req, res) => {
     }
 });
 
+Router.post("/userSignUp", async (req, res) => {
+    try {
+
+        const body = req.body;
+
+        const user = {
+            tenantId: v4()
+        };
+
+        if (!body || !body.email || !body.name) throw new Error("Required params not received in the body...");
+
+        user.name = body.name;
+        user.email = body.email;
+
+        if (body.password) {
+            user.password = hashPassword(body.password);
+        } else {
+            const randomString = require("crypto").randomBytes(10).toString("hex");
+            user.password = hashPassword(randomString);
+        }
+
+        const createdUser = new User(user);
+        await createdUser.save();
+
+        res.status(200).send({ message: "user created successfully..." });
+
+    } catch (err) {
+        console.log("Error: ", err);
+        res.status(500).send({ message: "User Sign Up Failed. May be email id already exist for this app.", status: "Failed" });
+    }
+});
+
 Router.post("/userLogin", async (req, res) => {
     try {
 
@@ -35,7 +70,7 @@ Router.post("/userLogin", async (req, res) => {
 
         const token = await user.generateToken({ userId: user._id });
 
-        res.status(200).send({ name: user.name, email: user.email, token });
+        res.status(200).send({ name: user.name, email: user.email, token, tenantId: user.tenantId });
 
     } catch (err) {
         console.error("Error while user login : ", err);

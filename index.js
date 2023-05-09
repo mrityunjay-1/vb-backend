@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const socketIO = require("socket.io");
 
-const ws = require("ws");
+// const ws = require("ws");
 
 const axios = require("axios");
 const fs = require("fs");
@@ -15,12 +15,13 @@ const { getSessionDetails } = require("./helperActions");
 require("dotenv").config();
 
 const { addUser, getUser, getAllUsers, removeUser, getUserRoomBySocketId } = require("./manageUsers");
-const audioRouter = require("./voice-recorder");
+// const audioRouter = require("./voice-recorder");
 const { ChatSessions } = require("./models/chat-sessions");
 
 // Routers
 const userRouter = require("./routes/userRouter");
 const sessionRouter = require("./routes/sessionRouter");
+const AiQnATrainingRouter = require("./routes/aiTrainings/qna_training");
 
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
 if (!BOT_NAME) process.exit(1);
@@ -217,16 +218,17 @@ io.on("connection", (socket) => {
 });
 
 // ws hu mai
-const wss = new ws.Server({server});
+// const wss = new ws.Server({server});
 
-wss.on("connection", (socket) => {
-  console.log("Socket connection received over ws : ", socket.id);
-});
+// wss.on("connection", (socket) => {
+//   console.log("Socket connection received over ws : ", socket.id);
+// });
 
 app.use(express.json());
 app.use(cors());
 app.use("/", userRouter);
 app.use("/", sessionRouter);
+app.use("/", AiQnATrainingRouter);
 
 // Watcher for live feed update
 const watcher = chokidar.watch("../../projects/outputs", { persistent: true });
@@ -311,7 +313,7 @@ app.post("/responseHook", async (req, res) => {
   }
 });
 
-app.use("/audio", audioRouter); // not in use as of now
+// app.use("/audio", audioRouter); // not in use as of now
 
 // console.log(path.join(__dirname, "./sessions"));
 
