@@ -22,6 +22,7 @@ const { ChatSessions } = require("./models/chat-sessions");
 const userRouter = require("./routes/userRouter");
 const sessionRouter = require("./routes/sessionRouter");
 const AiQnATrainingRouter = require("./routes/aiTrainings/qna_training");
+const botRouter = require("./routes/botRouter");
 
 const BOT_NAME = process?.env?.BOT_NAME ?? "";
 if (!BOT_NAME) process.exit(1);
@@ -229,6 +230,7 @@ app.use(cors());
 app.use("/", userRouter);
 app.use("/", sessionRouter);
 app.use("/", AiQnATrainingRouter);
+app.use("/", botRouter);
 
 // Watcher for live feed update
 const watcher = chokidar.watch("../../projects/outputs", { persistent: true });

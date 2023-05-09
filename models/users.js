@@ -3,11 +3,6 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 
 const UserSchema = mongoose.Schema({
-    tenantId: {
-        type: String,
-        required: true,
-        unique: true
-    },
     name: {
         type: String,
         required: true
@@ -19,7 +14,11 @@ const UserSchema = mongoose.Schema({
     },
     password: {
         type: String,
-    }
+    },
+    bots: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Bot"
+    }]
 }, {
     timestamps: true
 });

@@ -1,6 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../../middlewares/authMiddleware");
 const axios = require("axios");
+const { Bot } = require("../../models/bots");
 
 const { multerMemoryStorage } = require("../../utils/multerHelper");
 const { readDataFromXlsxFileBuffer } = require("../../utils/xlsxReadFile");
@@ -12,7 +13,11 @@ Router.post("/trainBotForQnA", authMiddleware, multerMemoryStorage.single("qna_d
 
         const body = req?.body;
 
-        if (!body || !body?.tenantId || !body?.botId) throw new Error("Invalid body received.");
+        if (!body || !body?.botId) throw new Error("Invalid body received.");
+
+        const bot = await Bot.findOne({ botId: body.botId });
+
+        if (!bot) throw new Error("Bot not found with given id.");
 
         if (!req?.file?.buffer) throw new Error("File not received in the body");
 
@@ -30,12 +35,12 @@ Router.post("/trainBotForQnA", authMiddleware, multerMemoryStorage.single("qna_d
         });
 
         if (Array.isArray(errorInRows) && errorInRows?.length > 0) {
-            return res.status(400).send({message: errorInRows.join("\n")});
+            return res.status(400).send({ message: errorInRows.join("\n") });
         }
 
         // getting only question and answer column from sheet data
         // I know, i am doing more computation here but yes when user sees this data they will amazed
-        const data = { tenantId: body.tenantId };
+        const data = { botId: body.botId };
 
         data.data = sheetData.map((row) => ({ question: row.question, answer: row.answer }));
 
@@ -47,7 +52,7 @@ Router.post("/trainBotForQnA", authMiddleware, multerMemoryStorage.single("qna_d
 
         // if (!ai_api_response || ai_api_response?.status !== 200 || !ai_api_response?.data) throw new Error("AI response is not 200. something wrong with the AI Qna Training API url.");
 
-        res.status(200).send({message: data});
+        res.status(200).send({ message: data });
 
     } catch (err) {
         console.log("Error in trainBotForQnA route: ", err);

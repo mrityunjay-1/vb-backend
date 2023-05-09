@@ -13,6 +13,8 @@ const QnaTrainingDataSchema = mongoose.Schema({
         type: String,
         default: "en"
     }
+}, {
+    timestamps: true
 });
 
 const QnaTrainingData = new mongoose.model("QnaTrainingData", QnaTrainingDataSchema);
