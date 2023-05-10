@@ -113,28 +113,24 @@ io.on("connection", (socket) => {
   socket.on("start_call", () => { });
 
   socket.on("audioStream", async (recording) => {
-    // console.log("recording: ", recording);
-
-    // console.log("users : ", users);
-
-    // call ai api here to pass audio data:
-    // const ai_api_res = await axios.post(process.env.AI_SERVER_URL, {
-    //   web_call_id: socket.id,
-    //   audioData: recording.audioData,
-    // });
-
-    // console.log("AI API response: ", ai_api_res);
-
     try {
 
+      // console.log("recording: ", recording);
+
+      // Checking all the required parameters to start conversation
+      if (!socket?.id || !recording?.botId || !recording?.audioData || recording?.audioData?.length === 0 || !process?.env?.AI_RECV_TYPE) {
+        throw new Error("No Proper Data received for starting conversation.");
+      }
+
       io.emit("webrecorder", {
-        webCallId: socket.id,
-        audioData: recording.audioData,
-        recv_type: process?.env?.AI_RECV_TYPE ?? "NA"
+        webCallId: socket?.id ?? "",
+        botId: recording?.botId ?? "",
+        audioData: recording?.audioData ?? [],
+        recv_type: process?.env?.AI_RECV_TYPE ?? ""
       });
 
     } catch (err) {
-      console.log("Error: ", err);
+      console.log("Error in audioStream socket event Listener: ", err);
     }
 
   });

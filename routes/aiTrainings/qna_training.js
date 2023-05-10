@@ -3,6 +3,8 @@ const authMiddleware = require("../../middlewares/authMiddleware");
 const axios = require("axios");
 const { Bot } = require("../../models/bots");
 
+const { QnaTrainingData } = require("../../models/qna-training-data");
+
 const { multerMemoryStorage } = require("../../utils/multerHelper");
 const { readDataFromXlsxFileBuffer } = require("../../utils/xlsxReadFile");
 
@@ -65,12 +67,55 @@ Router.post("/finalDataForQnaTraining", authMiddleware, async (req, res) => {
 
         const body = req.body;
 
-        res.status(200).send({ message: body });
+        // console.log("body.botId : ", body.botId);
+
+        if (!body || !body?.botId || !body?.qnaData || !Array.isArray(body?.qnaData) || body?.qnaData?.length < 1) {
+            throw new Error("proper data not received in request body.");
+        }
+
+        // let's prepare data to insert many qna's at once
+        let data = body?.qnaData?.map((qna) => ({ botId: body?.botId, question: qna.question, answer: qna.answer })) ?? [];
+
+        console.log("Data : ", data);
+
+        const insertManyResponse = await QnaTrainingData.insertMany(data);
+
+        console.log("insertManyResponse : ", insertManyResponse);
+
+        res.status(200).send({ message: "Data successfully added." });
 
     } catch (err) {
         console.log("Error in finalDataForQnaTraining route: ", err);
         res.status(500).send({ message: "something went wrong..." });
     }
-})
+});
+
+Router.get("/getBotQnaTraningData/:botId", authMiddleware, async (req, res) => {
+    try {
+
+        const botId = req?.params?.botId ?? "";
+
+        if (!botId) throw new Error("No bot id found");
+
+        const queries = req.query;
+
+        console.log("quesries: ", queries);
+
+        let limit = 10, skip = 10;
+
+        if (queries && queries.limit && queries.skip) {
+            limit = +queries.limit;
+            skip = +queries.skip;
+        }
+
+        const qnaTrainingData = await QnaTrainingData.find({ botId });
+
+        res.status(200).send(qnaTrainingData);
+
+    } catch (err) {
+        console.log("Error in getBotQnaTraningData route: ", err);
+        res.status(500).send({ message: "something went wrong..." });
+    }
+});
 
 module.exports = Router;

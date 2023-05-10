@@ -1,18 +1,21 @@
 const mongoose = require("mongoose");
 
 const QnaTrainingDataSchema = mongoose.Schema({
-    question: {
+    botId: {
         type: String,
         required: true
     },
+    question: [{
+        type: String
+    }],
     answer: {
         type: String,
         required: true
     },
-    language: {
+    language: [{
         type: String,
         default: "en"
-    }
+    }]
 }, {
     timestamps: true
 });
