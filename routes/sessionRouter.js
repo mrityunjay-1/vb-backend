@@ -69,11 +69,12 @@ Router.get("/getSession/:socketId", authMiddleware, async (req, res) => {
         // let data = fs.readdirSync(path.join(__dirname, "../sessions/" + param));
         // data = data.map((d) => ("http://localhost:9000/" + param + "/" + d));
         // const transcription_path = path.join(__dirname, "../../projects/transcriptions/" + param + ".json");
-        // const chat_session_data = getSessionDetails(param);
+        
+        const chat_session_data = getSessionDetails(socketId);
 
-        const sessionDetails = await ChatLogs.findOne({ chat_session: socketId });
+        // const sessionDetails = await ChatLogs.findOne({ chat_session: socketId });
 
-        res.status(200).send(sessionDetails.logs);
+        res.status(200).send(chat_session_data);
 
     } catch (err) {
         console.log("Error in getsession: ", err);
