@@ -108,13 +108,61 @@ Router.get("/getBotQnaTraningData/:botId", authMiddleware, async (req, res) => {
             skip = +queries.skip;
         }
 
-        const qnaTrainingData = await QnaTrainingData.find({ botId });
+        const qnaTrainingData = await QnaTrainingData.find({ botId }).sort({ _id: -1 });
 
         res.status(200).send(qnaTrainingData);
 
     } catch (err) {
         console.log("Error in getBotQnaTraningData route: ", err);
         res.status(500).send({ message: "something went wrong..." });
+    }
+});
+
+Router.post("/createQnA/:botId", authMiddleware, async (req, res) => {
+    try {
+
+        const botId = req?.params?.botId;
+
+        if (!botId) throw new Error("Bot Id not received in the url params...");
+
+        const qnaDetails = req.body;
+
+        if (!qnaDetails || !qnaDetails?.question || !Array.isArray(qnaDetails?.question) || qnaDetails?.question?.length < 1 || !qnaDetails?.answer) {
+            throw new Error("Expected data not received on the request body...");
+        }
+
+        const qna = new QnaTrainingData({
+            botId,
+            question: qnaDetails.question,
+            answer: qnaDetails.answer
+        });
+
+        await qna.save();
+
+        res.status(200).send(qna);
+
+    } catch (err) {
+        console.log("Error in createQnA route: ", err);
+        res.status(500).send({ message: "something went wrong..." });
+    }
+});
+
+Router.get("/deleteQnA/:qnaId", authMiddleware, async (req, res) => {
+    try {
+
+        const qnaId = req?.params.qnaId;
+
+        if (!qnaId) throw new Error("QnA Id not received in url params.");
+
+        const deletedQnARes = await QnaTrainingData.deleteOne({ _id: qnaId });
+
+        if (deletedQnARes?.deletedCount === 0) throw new Error("Could not delete the qna may be id does not exist in the db");
+
+        res.status(200).send({ message: "qna deleted successfully..." });
+
+    } catch (err) {
+        console.log("Error in deleteQnA route : ", err);
+        res.status(500).send({ message: "something went wrong while deleting the qna" });
     }
 });
 
