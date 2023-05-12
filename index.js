@@ -31,7 +31,7 @@ const app = express();
 const server = http.createServer(app);
 
 const sound_recordings_path = path.join(__dirname, "../../projects/sound_recordings");
-const audio_files_path = `../../projects/audio_files_${BOT_NAME}`;
+const audio_files_path = `../../projects/audio_files/${BOT_NAME}`;
 
 app.use("/", express.static(sound_recordings_path));
 app.use("/", express.static(audio_files_path));
