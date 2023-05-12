@@ -118,8 +118,12 @@ io.on("connection", (socket) => {
       // console.log("recording: ", recording);
 
       // Checking all the required parameters to start conversation
-      if (!socket?.id || !recording?.botId || !recording?.audioData || recording?.audioData?.length === 0 || !process?.env?.AI_RECV_TYPE) {
+      if (!socket?.id || !recording?.audioData || recording?.audioData?.length === 0 || !process?.env?.AI_RECV_TYPE) {
         throw new Error("No Proper Data received for starting conversation.");
+      }
+
+      if (!recording?.botId) {
+        recording.botId = "";
       }
 
       io.emit("webrecorder", {
