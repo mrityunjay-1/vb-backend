@@ -46,14 +46,6 @@ Router.post("/trainBotForQnA", authMiddleware, multerMemoryStorage.single("qna_d
 
         data.data = sheetData.map((row) => ({ question: row.question, answer: row.answer }));
 
-        // now sending this data to ai for training
-
-        // if (!process?.env?.AI_QNA_REMOTE_TRAINING_URL) throw new Error("AI traning remote url not found in the environment variable.");
-
-        // const ai_api_response = await axios.post(process.env.AI_QNA_REMOTE_TRAINING_URL, data);
-
-        // if (!ai_api_response || ai_api_response?.status !== 200 || !ai_api_response?.data) throw new Error("AI response is not 200. something wrong with the AI Qna Training API url.");
-
         res.status(200).send({ message: data });
 
     } catch (err) {
@@ -192,5 +184,27 @@ Router.post("/updateQnA/:qnaId", async (req, res) => {
         res.status(500).send({ message: "something went wrong..." });
     }
 });
+
+Router.post("/userRequestedForTraining", async (req, res) => {
+    try {
+
+        console.log("User Requested for QnA Training...");
+        console.log("Let's Start QnA Training...");
+
+        // now sending this data to ai for training
+
+        // if (!process?.env?.AI_QNA_REMOTE_TRAINING_URL) throw new Error("AI traning remote url not found in the environment variable.");
+
+        // const ai_api_response = await axios.post(process.env.AI_QNA_REMOTE_TRAINING_URL, data);
+
+        // if (!ai_api_response || ai_api_response?.status !== 200 || !ai_api_response?.data) throw new Error("AI response is not 200. something wrong with the AI Qna Training API url.");
+
+        res.status(200).send({ "message": "QnA Training Started..." });
+
+    } catch (err) {
+        console.log("Error in userRequestedForTraining route : ", err);
+        res.status(500).send({ message: "something went wrong..." });
+    }
+})
 
 module.exports = Router;
