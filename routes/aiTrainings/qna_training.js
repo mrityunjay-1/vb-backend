@@ -93,14 +93,14 @@ Router.get("/getBotQnaTraningData/:botId", authMiddleware, async (req, res) => {
 
         console.log("quesries: ", queries);
 
-        let limit = 10, skip = 10;
+        let limit = 10, skip = 0;
 
         if (queries && queries.limit && queries.skip) {
             limit = +queries.limit;
             skip = +queries.skip;
         }
 
-        const qnaTrainingData = await QnaTrainingData.find({ botId }).sort({ _id: -1 });
+        const qnaTrainingData = await QnaTrainingData.find({ botId }).limit(limit).skip(skip).sort({ _id: -1 });
 
         res.status(200).send(qnaTrainingData);
 
