@@ -166,4 +166,31 @@ Router.get("/deleteQnA/:qnaId", authMiddleware, async (req, res) => {
     }
 });
 
+Router.post("/updateQnA/:qnaId", async (req, res) => {
+    try {
+
+        const qnaId = req?.params?.qnaId;
+
+        if (!qnaId) throw new Error("qnaId not received in the url params for updating qna.");
+
+        const updateBody = req.body;
+
+        if (!updateBody) throw new Error("No update body received in the request body to update qna");
+
+        const updatedQnA = await QnaTrainingData.updateOne(
+            { _id: qnaId },
+            { $set: updateBody },
+            { new: true }
+        );
+
+        if (!updatedQnA || updatedQnA.modifiedCount < 1) throw new Error("Nothing chaged for modification...");
+
+        res.status(200).send({ message: "QnA successfully updated..." });
+
+    } catch (err) {
+        console.log("Error in updateQnA route : ", err);
+        res.status(500).send({ message: "something went wrong..." });
+    }
+});
+
 module.exports = Router;
