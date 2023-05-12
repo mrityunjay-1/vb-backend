@@ -205,6 +205,6 @@ Router.post("/userRequestedForTraining", async (req, res) => {
         console.log("Error in userRequestedForTraining route : ", err);
         res.status(500).send({ message: "something went wrong..." });
     }
-})
+});
 
 module.exports = Router;
