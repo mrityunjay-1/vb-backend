@@ -5,6 +5,7 @@ const { ChatSessions } = require("./models/chat-sessions");
 
 const { getSessionDetails } = require("./helperActions");
 
+// this thing is currently not in use -> using mongodb to maintain users...
 let users = [];
 
 const addUser = async (userData) => {

@@ -1,37 +1,43 @@
 
 const getSessionDetails = (param) => {
-    console.log("getsession details : ", param);
+    try {
 
-    const path = "../../projects/outputs/" + param + ".json";
+        console.log("getsession details : ", param);
 
-    delete require.cache[require.resolve(path)];
+        const path = "../../projects/outputs/" + param + ".json";
 
-    console.log("path: ", path);
+        delete require.cache[require.resolve(path)];
 
-    let transcription_data = require(path);
+        console.log("path: ", path);
 
-    console.log("transcription_data: ", transcription_data);
+        let transcription_data = require(path);
 
-    let chat_session_data = [];
+        console.log("transcription_data: ", transcription_data);
 
-    for (const [key, _value] of Object.entries(transcription_data)) {
-        let obj = {
-            user: {
-                time: key,
-                text: transcription_data[key]["User"],
-                audio: `${process.env.SERVER_URL}/` + param + "/" + "user_" + key + ".wav",
-            },
-            bot: {
-                time: key,
-                text: transcription_data[key]["Bot"],
-                audio: `${process.env.SERVER_URL}/` + param + "/" + "bot_" + key + ".mp3",
-            },
-        };
+        let chat_session_data = [];
 
-        chat_session_data.push(obj);
+        for (const [key, _value] of Object.entries(transcription_data)) {
+            let obj = {
+                user: {
+                    time: key,
+                    text: transcription_data[key]["User"],
+                    audio: `${process.env.SERVER_URL}/` + param + "/" + "user_" + key + ".wav",
+                },
+                bot: {
+                    time: key,
+                    text: transcription_data[key]["Bot"],
+                    audio: `${process.env.SERVER_URL}/` + param + "/" + "bot_" + key + ".mp3",
+                },
+            };
+
+            chat_session_data.push(obj);                                                                                                                                        
+        }
+
+        return chat_session_data;
+    } catch (err) {
+        console.log("Error: ", err);
+        return [];
     }
-
-    return chat_session_data;
 }
 
 module.exports = {

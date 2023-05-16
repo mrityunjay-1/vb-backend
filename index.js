@@ -115,7 +115,7 @@ io.on("connection", (socket) => {
   socket.on("audioStream", async (recording) => {
     try {
 
-      // console.log("recording: ", recording);
+      console.log("recording: ", recording);
 
       // Checking all the required parameters to start conversation
       if (!socket?.id || !recording?.audioData || recording?.audioData?.length === 0 || !process?.env?.AI_RECV_TYPE) {
